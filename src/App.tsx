@@ -32,11 +32,34 @@ function AppContent() {
   }, [selectedKey]);
 
   const handleToggleVoicing = (id: string) => {
-    setSelectedVoicingIds(prev =>
-      prev.includes(id)
-        ? prev.filter(v => v !== id)
-        : [...prev, id]
-    );
+    setSelectedVoicingIds(prev => {
+      // If deselecting, always allow
+      if (prev.includes(id)) {
+        return prev.filter(v => v !== id);
+      }
+
+      // If selecting, check limit
+      // Find which chord this voicing belongs to
+      const chord = availableChords.find(c => c.voicings.some(v => v.id === id));
+      if (!chord) return prev; // Should not happen
+
+      // Check if this chord is already selected (has at least one voicing in prev)
+      const isChordSelected = chord.voicings.some(v => prev.includes(v.id));
+
+      if (!isChordSelected) {
+        // It's a new chord. Check if we already have 12 unique chords selected.
+        const currentSelectedChordsCount = availableChords.filter(c =>
+          c.voicings.some(v => prev.includes(v.id))
+        ).length;
+
+        if (currentSelectedChordsCount >= 12) {
+          alert("You can only select up to 12 chords.");
+          return prev;
+        }
+      }
+
+      return [...prev, id];
+    });
   };
 
   const handleToggleChordAll = (_: string, allIds: string[]) => {
@@ -46,6 +69,31 @@ function AppContent() {
       setSelectedVoicingIds(prev => prev.filter(id => !allIds.includes(id)));
     } else {
       // Select all
+      // Check if this is a new chord
+      // Since we are selecting all for a specific chord, we just need to check if this chord is already partially selected or not.
+      // Actually, handleToggleChordAll is called for a specific chord group (all voicings of one chord).
+
+      // We need to know if this chord is currently "selected" (has > 0 voicings).
+      // But `allIds` are just IDs. We can find the chord from one ID.
+      if (allIds.length === 0) return;
+
+      const chord = availableChords.find(c => c.voicings.some(v => v.id === allIds[0]));
+      if (!chord) return;
+
+      const isChordSelected = chord.voicings.some(v => selectedVoicingIds.includes(v.id));
+
+      if (!isChordSelected) {
+        // New chord. Check limit.
+        const currentSelectedChordsCount = availableChords.filter(c =>
+          c.voicings.some(v => selectedVoicingIds.includes(v.id))
+        ).length;
+
+        if (currentSelectedChordsCount >= 12) {
+          alert("You can only select up to 12 chords.");
+          return;
+        }
+      }
+
       setSelectedVoicingIds(prev => {
         const others = prev.filter(id => !allIds.includes(id));
         return [...others, ...allIds];
@@ -54,7 +102,9 @@ function AppContent() {
   };
 
   const handleSelectAllGlobal = () => {
-    const allVoicings = availableChords.flatMap(c => c.voicings.map(v => v.id));
+    // Select random 12 chords
+    const shuffled = [...availableChords].sort(() => 0.5 - Math.random()).slice(0, 12);
+    const allVoicings = shuffled.flatMap(c => c.voicings.map(v => v.id));
     setSelectedVoicingIds(allVoicings);
   };
 
@@ -67,9 +117,15 @@ function AppContent() {
     audioEngine.strumChord(voicing.notes, "1n", 0.06);
   }, []);
 
+  const [gameChords, setGameChords] = useState<typeof availableChords>([]);
+
   const nextRound = useCallback(() => {
-    // Filter available voicings based on selection
-    const activeVoicings = availableChords.flatMap(c => c.voicings).filter(v => selectedVoicingIds.includes(v.id));
+    // Filter available voicings based on selection AND the active game chords
+    // We only want voicings that belong to the chords currently in the game
+    const activeChords = gameChords.length > 0 ? gameChords : availableChords;
+
+    // Get all valid voicings from the active game chords that are also selected
+    const activeVoicings = activeChords.flatMap(c => c.voicings).filter(v => selectedVoicingIds.includes(v.id));
 
     if (activeVoicings.length < 2) return;
 
@@ -81,7 +137,7 @@ function AppContent() {
     } while (activeVoicings.length > 1 && nextVoicing === currentVoicing);
 
     // Find chord name for this voicing
-    const chord = availableChords.find(c => c.voicings.some(v => v.id === nextVoicing.id));
+    const chord = activeChords.find(c => c.voicings.some(v => v.id === nextVoicing.id));
 
     setCurrentVoicing(nextVoicing);
     setCurrentChordName(chord ? chord.name : null);
@@ -89,7 +145,7 @@ function AppContent() {
     setLastGuessedName(null);
 
     setTimeout(() => playVoicing(nextVoicing), 500);
-  }, [availableChords, selectedVoicingIds, currentVoicing, playVoicing]);
+  }, [availableChords, selectedVoicingIds, currentVoicing, playVoicing, gameChords]);
 
   const handleStart = () => {
     if (isPlaying) {
@@ -98,10 +154,47 @@ function AppContent() {
       setCurrentChordName(null);
       setFeedback(null);
       setIsDrawerOpen(true); // Open drawer when stopping
+      setGameChords([]); // Reset game chords
     } else {
+      // Determine which chords are selected (have at least one voicing selected)
+      const selectedChords = availableChords.filter(c =>
+        c.voicings.some(v => selectedVoicingIds.includes(v.id))
+      );
+
+      // Limit is enforced at selection time, so we can just use selectedChords
+      // But just in case, we can slice it (though UI shouldn't allow > 12)
+      const chordsForGame = selectedChords.slice(0, 12);
+
+      setGameChords(chordsForGame);
       setIsPlaying(true);
       setIsDrawerOpen(false); // Close drawer when starting
-      nextRound();
+
+      // We need to wait for state update or pass the chords directly to nextRound logic
+      // Since nextRound depends on gameChords state, we can't call it immediately if we just set state.
+      // However, we can duplicate the logic slightly or use a useEffect.
+      // Better: pass the chords to a helper or use a timeout.
+      // Simplest here: just call nextRound inside a setTimeout to let state settle,
+      // OR refactor nextRound to accept chords. Let's use setTimeout for simplicity in this refactor.
+      setTimeout(() => {
+        // We need to manually trigger the first round logic here because nextRound uses the state
+        // which might not be updated yet in the closure if we just called it.
+        // Actually, let's just use a useEffect to trigger nextRound when isPlaying becomes true?
+        // No, that might trigger on re-renders.
+        // Let's just do the logic manually here for the first pick to be safe and immediate.
+
+        const activeVoicings = chordsForGame.flatMap(c => c.voicings).filter(v => selectedVoicingIds.includes(v.id));
+        if (activeVoicings.length > 0) {
+          const randomIndex = Math.floor(Math.random() * activeVoicings.length);
+          const nextVoicing = activeVoicings[randomIndex];
+          const chord = chordsForGame.find(c => c.voicings.some(v => v.id === nextVoicing.id));
+
+          setCurrentVoicing(nextVoicing);
+          setCurrentChordName(chord ? chord.name : null);
+          setFeedback(null);
+          setLastGuessedName(null);
+          setTimeout(() => playVoicing(nextVoicing), 500);
+        }
+      }, 0);
     }
   };
 
@@ -125,10 +218,7 @@ function AppContent() {
     }
   };
 
-  // Get unique chords that have at least one selected voicing (for options display)
-  const activeChordOptions = availableChords.filter(c =>
-    c.voicings.some(v => selectedVoicingIds.includes(v.id))
-  );
+
 
   return (
     <Layout
@@ -174,7 +264,7 @@ function AppContent() {
           <QuizArea
             currentVoicing={currentVoicing}
             currentChordName={currentChordName}
-            options={activeChordOptions}
+            options={gameChords}
             onGuess={handleGuess}
             feedback={feedback}
             onReplay={handleReplay}

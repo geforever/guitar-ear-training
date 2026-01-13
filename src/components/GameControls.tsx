@@ -164,6 +164,14 @@ const GameControls: React.FC<GameControlsProps> = ({
 
             {/* Start Button */}
             <div className="sticky bottom-0 bg-gray-900 pt-4 border-t border-gray-800">
+                <div className="flex justify-between items-center mb-2 px-1">
+                    <span className="text-xs text-gray-400">
+                        {selectedVoicingIds.length} voicings selected
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        (Max 12 chords in game)
+                    </span>
+                </div>
                 <button
                     onClick={onStart}
                     disabled={selectedVoicingIds.length < 2}
