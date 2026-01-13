@@ -15,7 +15,7 @@ function AppContent() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
 
   const [currentVoicing, setCurrentVoicing] = useState<ChordVoicing | null>(null);
-  const [currentChordName, setCurrentChordName] = useState<string | null>(null);
+
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [lastGuessedName, setLastGuessedName] = useState<string | null>(null);
 
@@ -76,98 +76,78 @@ function AppContent() {
     audioEngine.strumChord(voicing.notes, "1n", 0.06);
   }, []);
 
-  const [gameChords, setGameChords] = useState<typeof availableChords>([]);
+  // Game state now tracks specific voicings as options
+  const [gameOptions, setGameOptions] = useState<{ voicing: ChordVoicing, chordName: string }[]>([]);
 
   const nextRound = useCallback(() => {
-    // Filter available voicings based on selection AND the active game chords
-    // We only want voicings that belong to the chords currently in the game
-    const activeChords = gameChords.length > 0 ? gameChords : availableChords;
+    if (gameOptions.length < 2) return;
 
-    // Get all valid voicings from the active game chords that are also selected
-    const activeVoicings = activeChords.flatMap(c => c.voicings).filter(v => selectedVoicingIds.includes(v.id));
-
-    if (activeVoicings.length < 2) return;
-
-    // Pick random voicing
-    let nextVoicing;
+    // Pick random option from gameOptions
+    let nextOption;
     do {
-      const randomIndex = Math.floor(Math.random() * activeVoicings.length);
-      nextVoicing = activeVoicings[randomIndex];
-    } while (activeVoicings.length > 1 && nextVoicing === currentVoicing);
+      const randomIndex = Math.floor(Math.random() * gameOptions.length);
+      nextOption = gameOptions[randomIndex];
+    } while (gameOptions.length > 1 && nextOption.voicing.id === currentVoicing?.id);
 
-    // Find chord name for this voicing
-    const chord = activeChords.find(c => c.voicings.some(v => v.id === nextVoicing.id));
-
-    setCurrentVoicing(nextVoicing);
-    setCurrentChordName(chord ? chord.name : null);
+    setCurrentVoicing(nextOption.voicing);
     setFeedback(null);
     setLastGuessedName(null);
 
-    setTimeout(() => playVoicing(nextVoicing), 500);
-  }, [availableChords, selectedVoicingIds, currentVoicing, playVoicing, gameChords]);
+    setTimeout(() => playVoicing(nextOption.voicing), 500);
+  }, [gameOptions, currentVoicing, playVoicing]);
 
   const handleStart = () => {
     if (isPlaying) {
       setIsPlaying(false);
       setCurrentVoicing(null);
-      setCurrentChordName(null);
       setFeedback(null);
       setIsDrawerOpen(true); // Open drawer when stopping
-      setGameChords([]); // Reset game chords
+      setGameOptions([]); // Reset game options
     } else {
-      // Determine which chords are selected (have at least one voicing selected)
-      const selectedChords = availableChords.filter(c =>
-        c.voicings.some(v => selectedVoicingIds.includes(v.id))
-      );
+      // Build game options from selected voicings
+      const options: { voicing: ChordVoicing, chordName: string }[] = [];
 
-      // Limit is enforced at selection time, so we can just use selectedChords
-      // But just in case, we can slice it (though UI shouldn't allow > 12)
-      const chordsForGame = selectedChords.slice(0, 12);
+      // We need to map selected IDs back to full voicing objects and their chord names
+      availableChords.forEach(chord => {
+        chord.voicings.forEach(voicing => {
+          if (selectedVoicingIds.includes(voicing.id)) {
+            options.push({ voicing, chordName: chord.name });
+          }
+        });
+      });
 
-      setGameChords(chordsForGame);
+      // Limit is enforced at selection time, but just in case
+      const finalOptions = options.slice(0, 12);
+
+      setGameOptions(finalOptions);
       setIsPlaying(true);
       setIsDrawerOpen(false); // Close drawer when starting
 
-      // We need to wait for state update or pass the chords directly to nextRound logic
-      // Since nextRound depends on gameChords state, we can't call it immediately if we just set state.
-      // However, we can duplicate the logic slightly or use a useEffect.
-      // Better: pass the chords to a helper or use a timeout.
-      // Simplest here: just call nextRound inside a setTimeout to let state settle,
-      // OR refactor nextRound to accept chords. Let's use setTimeout for simplicity in this refactor.
       setTimeout(() => {
-        // We need to manually trigger the first round logic here because nextRound uses the state
-        // which might not be updated yet in the closure if we just called it.
-        // Actually, let's just use a useEffect to trigger nextRound when isPlaying becomes true?
-        // No, that might trigger on re-renders.
-        // Let's just do the logic manually here for the first pick to be safe and immediate.
+        if (finalOptions.length > 0) {
+          const randomIndex = Math.floor(Math.random() * finalOptions.length);
+          const nextOption = finalOptions[randomIndex];
 
-        const activeVoicings = chordsForGame.flatMap(c => c.voicings).filter(v => selectedVoicingIds.includes(v.id));
-        if (activeVoicings.length > 0) {
-          const randomIndex = Math.floor(Math.random() * activeVoicings.length);
-          const nextVoicing = activeVoicings[randomIndex];
-          const chord = chordsForGame.find(c => c.voicings.some(v => v.id === nextVoicing.id));
-
-          setCurrentVoicing(nextVoicing);
-          setCurrentChordName(chord ? chord.name : null);
+          setCurrentVoicing(nextOption.voicing);
           setFeedback(null);
           setLastGuessedName(null);
-          setTimeout(() => playVoicing(nextVoicing), 500);
+          setTimeout(() => playVoicing(nextOption.voicing), 500);
         }
       }, 0);
     }
   };
 
-  const handleGuess = (guessedName: string) => {
-    if (!currentChordName) return;
+  const handleGuess = (guessedVoicingId: string) => {
+    if (!currentVoicing) return;
 
-    if (guessedName === currentChordName) {
+    if (guessedVoicingId === currentVoicing.id) {
       setFeedback('correct');
       setTimeout(() => {
         nextRound();
       }, 1500);
     } else {
       setFeedback('incorrect');
-      setLastGuessedName(guessedName);
+      setLastGuessedName(guessedVoicingId); // Now storing ID
     }
   };
 
@@ -221,8 +201,7 @@ function AppContent() {
         ) : (
           <QuizArea
             currentVoicing={currentVoicing}
-            currentChordName={currentChordName}
-            options={gameChords}
+            options={gameOptions}
             onGuess={handleGuess}
             feedback={feedback}
             onReplay={handleReplay}

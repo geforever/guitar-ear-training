@@ -11,6 +11,7 @@ interface Translations {
     backToSettings: string;
     key: string;
     replayChord: string;
+    replay: string;
     correct: string;
     incorrect: string;
     tryAgain: string;
@@ -34,6 +35,7 @@ const translations: Record<Language, Translations> = {
         backToSettings: 'Back to Settings',
         key: 'Key',
         replayChord: 'Replay Chord',
+        replay: 'Replay Sound',
         correct: 'Correct! 🎉',
         incorrect: 'Try Again! ❌',
         tryAgain: 'Try Again!',
@@ -55,6 +57,7 @@ const translations: Record<Language, Translations> = {
         backToSettings: '返回设置',
         key: '调号',
         replayChord: '重播和弦',
+        replay: '重播声音', // Added this line
         correct: '回答正确! 🎉',
         incorrect: '回答错误! ❌',
         tryAgain: '请重试!',
