@@ -38,24 +38,10 @@ function AppContent() {
         return prev.filter(v => v !== id);
       }
 
-      // If selecting, check limit
-      // Find which chord this voicing belongs to
-      const chord = availableChords.find(c => c.voicings.some(v => v.id === id));
-      if (!chord) return prev; // Should not happen
-
-      // Check if this chord is already selected (has at least one voicing in prev)
-      const isChordSelected = chord.voicings.some(v => prev.includes(v.id));
-
-      if (!isChordSelected) {
-        // It's a new chord. Check if we already have 12 unique chords selected.
-        const currentSelectedChordsCount = availableChords.filter(c =>
-          c.voicings.some(v => prev.includes(v.id))
-        ).length;
-
-        if (currentSelectedChordsCount >= 12) {
-          alert("You can only select up to 12 chords.");
-          return prev;
-        }
+      // If selecting, check limit (Max 12 voicings)
+      if (prev.length >= 12) {
+        alert("You can only select up to 12 specific chords (voicings).");
+        return prev;
       }
 
       return [...prev, id];
@@ -69,43 +55,16 @@ function AppContent() {
       setSelectedVoicingIds(prev => prev.filter(id => !allIds.includes(id)));
     } else {
       // Select all
-      // Check if this is a new chord
-      // Since we are selecting all for a specific chord, we just need to check if this chord is already partially selected or not.
-      // Actually, handleToggleChordAll is called for a specific chord group (all voicings of one chord).
+      // Calculate how many new items we are adding
+      const newIds = allIds.filter(id => !selectedVoicingIds.includes(id));
 
-      // We need to know if this chord is currently "selected" (has > 0 voicings).
-      // But `allIds` are just IDs. We can find the chord from one ID.
-      if (allIds.length === 0) return;
-
-      const chord = availableChords.find(c => c.voicings.some(v => v.id === allIds[0]));
-      if (!chord) return;
-
-      const isChordSelected = chord.voicings.some(v => selectedVoicingIds.includes(v.id));
-
-      if (!isChordSelected) {
-        // New chord. Check limit.
-        const currentSelectedChordsCount = availableChords.filter(c =>
-          c.voicings.some(v => selectedVoicingIds.includes(v.id))
-        ).length;
-
-        if (currentSelectedChordsCount >= 12) {
-          alert("You can only select up to 12 chords.");
-          return;
-        }
+      if (selectedVoicingIds.length + newIds.length > 12) {
+        alert(`You can only select up to 12 specific chords. You have ${selectedVoicingIds.length} selected and are trying to add ${newIds.length}.`);
+        return;
       }
 
-      setSelectedVoicingIds(prev => {
-        const others = prev.filter(id => !allIds.includes(id));
-        return [...others, ...allIds];
-      });
+      setSelectedVoicingIds(prev => [...prev, ...newIds]);
     }
-  };
-
-  const handleSelectAllGlobal = () => {
-    // Select random 12 chords
-    const shuffled = [...availableChords].sort(() => 0.5 - Math.random()).slice(0, 12);
-    const allVoicings = shuffled.flatMap(c => c.voicings.map(v => v.id));
-    setSelectedVoicingIds(allVoicings);
   };
 
   const handleClearAllGlobal = () => {
@@ -235,7 +194,6 @@ function AppContent() {
           selectedVoicingIds={selectedVoicingIds}
           onToggleVoicing={handleToggleVoicing}
           onToggleChordAll={handleToggleChordAll}
-          onSelectAll={handleSelectAllGlobal}
           onClearAll={handleClearAllGlobal}
         />
       }

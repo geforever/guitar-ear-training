@@ -14,14 +14,13 @@ interface GameControlsProps {
     selectedVoicingIds: string[];
     onToggleVoicing: (id: string) => void;
     onToggleChordAll: (chordName: string, allIds: string[]) => void;
-    onSelectAll: () => void;
     onClearAll: () => void;
 }
 
 const GameControls: React.FC<GameControlsProps> = ({
     keys, selectedKey, onKeyChange, onStart, isPlaying,
     rootGroups, selectedVoicingIds, onToggleVoicing, onToggleChordAll,
-    onSelectAll, onClearAll
+    onClearAll
 }) => {
     const { t } = useLanguage();
     const [expandedRoots, setExpandedRoots] = useState<string[]>([]);
@@ -56,13 +55,6 @@ const GameControls: React.FC<GameControlsProps> = ({
                 <div className="flex justify-between items-end mb-3">
                     <label className="block text-sm font-medium text-gray-400">{t.selectChords}</label>
                     <div className="flex gap-2">
-                        <button
-                            onClick={onSelectAll}
-                            disabled={isPlaying}
-                            className="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded transition-colors"
-                        >
-                            {t.selectAll}
-                        </button>
                         <button
                             onClick={onClearAll}
                             disabled={isPlaying}
