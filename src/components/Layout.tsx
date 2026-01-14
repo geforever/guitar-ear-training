@@ -1,4 +1,6 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { Settings, X } from 'lucide-react';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -9,46 +11,31 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, drawerContent, isDrawerOpen, onDrawerToggle }) => {
     return (
-        <div className="h-screen w-screen bg-gray-900 text-white overflow-hidden flex relative">
-
+        <div className="flex h-screen w-screen overflow-hidden bg-gray-50 text-gray-900">
             {/* Main Content Area */}
-            <div className="flex-1 h-full relative flex flex-col overflow-hidden">
+            <main className="flex-1 h-full relative overflow-hidden flex flex-col">
                 {children}
-
-                {/* Drawer Toggle Button (if closed) */}
-                {!isDrawerOpen && (
-                    <button
-                        onClick={onDrawerToggle}
-                        className="absolute top-6 right-6 p-3 bg-gray-700 hover:bg-gray-600 rounded-full shadow-lg transition-all z-10"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="3" y1="12" x2="21" y2="12"></line>
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <line x1="3" y1="18" x2="21" y2="18"></line>
-                        </svg>
-                    </button>
-                )}
-            </div>
+            </main>
 
             {/* Right Drawer */}
-            <div
-                className={`h-full bg-gray-900 border-l border-gray-700 transition-all duration-300 ease-in-out flex flex-col absolute right-0 top-0 bottom-0 z-20 shadow-2xl ${isDrawerOpen ? 'w-[400px] translate-x-0' : 'w-[400px] translate-x-full'
-                    }`}
+            <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: isDrawerOpen ? 400 : 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="h-full bg-white border-l border-gray-200 shadow-xl overflow-hidden flex flex-col z-20"
             >
-                <div className="p-4 flex justify-between items-center border-b border-gray-800">
-                    <h2 className="text-xl font-bold">Settings</h2>
-                    <button onClick={onDrawerToggle} className="p-2 hover:bg-gray-800 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="w-[400px] h-full overflow-y-auto p-6">
                     {drawerContent}
                 </div>
-            </div>
+            </motion.div>
 
+            {/* Toggle Button (Floating) */}
+            <button
+                onClick={onDrawerToggle}
+                className="absolute top-6 right-6 z-30 p-3 bg-white hover:bg-gray-100 text-gray-700 rounded-full shadow-lg transition-all border border-gray-200"
+            >
+                {isDrawerOpen ? <X size={24} /> : <Settings size={24} />}
+            </button>
         </div>
     );
 };

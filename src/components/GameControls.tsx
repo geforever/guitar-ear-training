@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import type { RootGroup } from '../data/chords';
+import type { RootGroup, Chord } from '../data/chords';
 import Fretboard from './Fretboard';
 import { useLanguage } from '../i18n/LanguageContext';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronUp, Settings, Check } from 'lucide-react';
 
 interface GameControlsProps {
     keys: string[];
@@ -13,7 +13,7 @@ interface GameControlsProps {
     rootGroups: RootGroup[];
     selectedVoicingIds: string[];
     onToggleVoicing: (id: string) => void;
-    onToggleChordAll: (chordName: string, allIds: string[]) => void;
+    onToggleChordAll: (chord: Chord) => void;
     onClearAll: () => void;
 }
 
@@ -25,7 +25,7 @@ const GameControls: React.FC<GameControlsProps> = ({
     const { t } = useLanguage();
     const [expandedRoots, setExpandedRoots] = useState<string[]>([]);
 
-    const toggleRoot = (root: string) => {
+    const toggleGroup = (root: string) => {
         setExpandedRoots(prev =>
             prev.includes(root)
                 ? prev.filter(r => r !== root)
@@ -33,153 +33,131 @@ const GameControls: React.FC<GameControlsProps> = ({
         );
     };
 
-    return (
-        <div className="flex flex-col gap-6 pb-20">
-            {/* Key Selection */}
-            <div className="w-full">
-                <label className="block text-sm font-medium text-gray-400 mb-2">{t.selectKey}</label>
-                <select
-                    value={selectedKey}
-                    onChange={(e) => onKeyChange(e.target.value)}
-                    disabled={isPlaying}
-                    className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                >
-                    {keys.map(key => (
-                        <option key={key} value={key}>{key}</option>
-                    ))}
-                </select>
-            </div>
+    // Circle of Fifths Order for sorting keys
+    const circleOfFifths = [
+        'C Major', 'G Major', 'D Major', 'A Major', 'E Major', 'B Major',
+        'F# Major', 'Db Major', 'Ab Major', 'Eb Major', 'Bb Major', 'F Major'
+    ];
 
-            {/* Chord Selection */}
-            <div className="w-full">
-                <div className="flex justify-between items-end mb-3">
-                    <label className="block text-sm font-medium text-gray-400">{t.selectChords}</label>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={onClearAll}
-                            disabled={isPlaying}
-                            className="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded transition-colors"
-                        >
-                            {t.selectNone}
-                        </button>
+    const sortedKeys = [...keys].sort((a, b) => {
+        return circleOfFifths.indexOf(a) - circleOfFifths.indexOf(b);
+    });
+
+    return (
+        <div className="flex flex-col gap-8 pb-10">
+            <div>
+                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-gray-800">
+                    <Settings size={24} />
+                    {t.settings}
+                </h2>
+
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-500 mb-2">{t.selectKey}</label>
+                    <div className="flex flex-wrap gap-2">
+                        {sortedKeys.map(key => (
+                            <button
+                                key={key}
+                                onClick={() => onKeyChange(key)}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all
+                  ${selectedKey === key
+                                        ? 'bg-blue-600 text-white shadow-md'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                {key}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-4">
-                    {rootGroups.map(group => {
-                        const isExpanded = expandedRoots.includes(group.root);
-                        // Check if any chord in this group is selected to show a visual hint even when collapsed
-                        const groupSelectedCount = group.chords.reduce((acc, chord) => {
-                            return acc + chord.voicings.filter(v => selectedVoicingIds.includes(v.id)).length;
-                        }, 0);
+                <div className="flex gap-2 mb-4">
+                    <button
+                        onClick={onClearAll}
+                        className="flex-1 py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                    >
+                        {t.selectNone}
+                    </button>
+                </div>
 
-                        return (
-                            <div key={group.root} className="border border-gray-700 rounded-lg overflow-hidden bg-gray-800/50">
-                                <button
-                                    onClick={() => toggleRoot(group.root)}
-                                    className="w-full flex items-center justify-between p-3 bg-gray-800 hover:bg-gray-750 transition-colors"
-                                >
-                                    <div className="flex items-center gap-2">
-                                        {isExpanded ? <ChevronDown size={18} className="text-gray-400" /> : <ChevronRight size={18} className="text-gray-400" />}
-                                        <span className="font-bold text-lg text-blue-400">{group.root} </span>
-                                    </div>
-                                    {groupSelectedCount > 0 && (
-                                        <span className="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded-full">
-                                            {groupSelectedCount} selected
-                                        </span>
-                                    )}
-                                </button>
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-semibold text-gray-700">{t.chordLibrary}</h3>
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${selectedVoicingIds.length > 12 ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
+                            {selectedVoicingIds.length} voicings selected
+                        </span>
+                    </div>
+                    <p className="text-xs text-gray-400 mb-4">(Max 12 voicings in game)</p>
 
-                                {isExpanded && (
-                                    <div className="p-3 space-y-4 border-t border-gray-700 bg-gray-900/30">
-                                        {group.chords.map(chord => {
-                                            const allIds = chord.voicings.map(v => v.id);
-                                            const allSelected = allIds.every(id => selectedVoicingIds.includes(id));
-                                            const someSelected = allIds.some(id => selectedVoicingIds.includes(id));
+                    {rootGroups.map((group) => (
+                        <div key={group.root} className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                            <button
+                                onClick={() => toggleGroup(group.root)}
+                                className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                            >
+                                <span className="font-bold text-lg text-gray-800">{group.root} Family</span>
+                                {expandedRoots.includes(group.root) ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
+                            </button>
 
-                                            return (
-                                                <div key={chord.name} className="bg-gray-800 rounded-lg p-3 border border-gray-700">
-                                                    <div className="flex items-center justify-between mb-3">
-                                                        <span className="font-bold text-lg">{chord.name}</span>
+                            {expandedRoots.includes(group.root) && (
+                                <div className="p-4 space-y-6 border-t border-gray-100">
+                                    {group.chords.map(chord => (
+                                        <div key={chord.name} className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <h4 className="font-medium text-blue-600">{chord.name}</h4>
+                                                <button
+                                                    onClick={() => onToggleChordAll(chord)}
+                                                    className="text-xs px-2 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded transition-colors"
+                                                >
+                                                    {t.selectAll}
+                                                </button>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {chord.voicings.map(voicing => {
+                                                    const isSelected = selectedVoicingIds.includes(voicing.id);
+                                                    return (
                                                         <button
-                                                            onClick={() => onToggleChordAll(chord.name, allIds)}
-                                                            disabled={isPlaying}
-                                                            className={`text-xs px-3 py-1.5 rounded font-medium transition-colors ${allSelected ? 'bg-blue-600 text-white' :
-                                                                someSelected ? 'bg-blue-900 text-blue-200' : 'bg-gray-700 text-gray-400'
-                                                                }`}
+                                                            key={voicing.id}
+                                                            onClick={() => onToggleVoicing(voicing.id)}
+                                                            className={`
+                                relative p-2 rounded-lg border-2 text-left transition-all group
+                                ${isSelected
+                                                                    ? 'border-blue-500 bg-blue-50'
+                                                                    : 'border-gray-200 bg-white hover:border-gray-300'
+                                                                }
+                              `}
                                                         >
-                                                            {allSelected ? t.selectAll : someSelected ? t.selectSome : t.selectNone}
-                                                        </button>
-                                                    </div>
-
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        {chord.voicings.map(voicing => (
-                                                            <button
-                                                                key={voicing.id}
-                                                                onClick={() => onToggleVoicing(voicing.id)}
-                                                                disabled={isPlaying}
-                                                                className={`relative p-2 rounded-lg border transition-all flex flex-col items-center gap-2 ${selectedVoicingIds.includes(voicing.id)
-                                                                    ? 'bg-blue-900/20 border-blue-500/50'
-                                                                    : 'bg-gray-700/30 border-transparent hover:bg-gray-700/50'
-                                                                    }`}
-                                                                title={voicing.label || voicing.id}
-                                                            >
-                                                                <div className="pointer-events-none scale-75 origin-top">
-                                                                    <Fretboard voicing={voicing} name="" width={80} height={100} />
-                                                                </div>
-                                                                <span className={`text-xs font-medium truncate w-full text-center ${selectedVoicingIds.includes(voicing.id) ? 'text-blue-300' : 'text-gray-500'
-                                                                    }`}>
+                                                            <div className="flex justify-between items-start mb-1">
+                                                                <span className={`text-xs font-medium ${isSelected ? 'text-blue-700' : 'text-gray-600'}`}>
                                                                     {voicing.label || 'Voicing'}
                                                                 </span>
-
-                                                                {/* Checkmark overlay */}
-                                                                {selectedVoicingIds.includes(voicing.id) && (
-                                                                    <div className="absolute top-2 right-2 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                                                                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                                        </svg>
-                                                                    </div>
-                                                                )}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
+                                                                {isSelected && <Check size={14} className="text-blue-500" />}
+                                                            </div>
+                                                            <div className="opacity-80 group-hover:opacity-100 transition-opacity">
+                                                                <Fretboard voicing={voicing} name="" width={60} height={80} />
+                                                            </div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            {/* Start Button */}
-            <div className="sticky bottom-0 bg-gray-900 pt-4 border-t border-gray-800">
-                <div className="flex justify-between items-center mb-2 px-1">
-                    <span className="text-xs text-gray-400">
-                        {selectedVoicingIds.length} voicings selected
-                    </span>
-                    <span className="text-xs text-gray-500">
-                        (Max 12 chords in game)
-                    </span>
-                </div>
-                <button
-                    onClick={onStart}
-                    disabled={selectedVoicingIds.length < 2}
-                    className={`w-full py-3 px-6 rounded-lg font-bold text-lg transition-all transform active:scale-95 ${isPlaying
-                        ? 'bg-red-600 hover:bg-red-700 text-white shadow-red-900/50'
-                        : selectedVoicingIds.length < 2
-                            ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-900/50 shadow-lg'
-                        }`}
-                >
-                    {isPlaying ? t.stopPractice : t.startPractice}
-                </button>
-                {selectedVoicingIds.length < 2 && (
-                    <p className="text-xs text-red-400 mt-2 text-center">{t.minSelection}</p>
-                )}
-            </div>
+            <button
+                onClick={onStart}
+                className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all transform active:scale-95
+          ${isPlaying
+                        ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/30'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/30'
+                    }`}
+            >
+                {isPlaying ? t.stopPractice : t.startPractice}
+            </button>
         </div>
     );
 };

@@ -48,7 +48,8 @@ function AppContent() {
     });
   };
 
-  const handleToggleChordAll = (_: string, allIds: string[]) => {
+  const handleToggleChordAll = (chord: { voicings: ChordVoicing[] }) => {
+    const allIds = chord.voicings.map(v => v.id);
     const allSelected = allIds.every(id => selectedVoicingIds.includes(id));
     if (allSelected) {
       // Deselect all
@@ -179,11 +180,11 @@ function AppContent() {
         />
       }
     >
-      <div className="flex flex-col items-center justify-center h-full w-full bg-gray-800/50 relative">
+      <div className="flex flex-col items-center justify-center h-full w-full bg-gray-50 relative text-gray-900">
         {/* Language Toggle */}
         <button
           onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
-          className="absolute top-6 left-6 p-3 bg-gray-700/50 hover:bg-gray-600 rounded-full text-white transition-all z-10 flex items-center gap-2"
+          className="absolute top-6 left-6 p-3 bg-white hover:bg-gray-100 border border-gray-200 shadow-sm rounded-full text-gray-700 transition-all z-10 flex items-center gap-2"
         >
           <Globe size={20} />
           <span className="text-sm font-bold">{language === 'en' ? 'EN' : '中'}</span>
@@ -191,11 +192,11 @@ function AppContent() {
 
         {!isPlaying ? (
           <div className="text-center p-10">
-            <Guitar size={80} className="text-blue-500 mx-auto mb-6" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-4">
+            <Guitar size={80} className="text-blue-600 mx-auto mb-6" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
               {t.title}
             </h1>
-            <p className="text-xl text-gray-400">
+            <p className="text-xl text-gray-500">
               {t.subtitle}
             </p>
           </div>
@@ -206,6 +207,7 @@ function AppContent() {
             onGuess={handleGuess}
             feedback={feedback}
             onReplay={handleReplay}
+            onNext={nextRound}
             lastGuessedName={lastGuessedName}
           />
         )}

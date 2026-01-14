@@ -12,6 +12,7 @@ interface Translations {
     key: string;
     replayChord: string;
     replay: string;
+    next: string;
     correct: string;
     incorrect: string;
     tryAgain: string;
@@ -23,6 +24,7 @@ interface Translations {
     selectSome: string;
     selectNone: string;
     minSelection: string;
+    chordLibrary: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -36,6 +38,7 @@ const translations: Record<Language, Translations> = {
         key: 'Key',
         replayChord: 'Replay Chord',
         replay: 'Replay Sound',
+        next: 'Next',
         correct: 'Correct! 🎉',
         incorrect: 'Try Again! ❌',
         tryAgain: 'Try Again!',
@@ -47,6 +50,7 @@ const translations: Record<Language, Translations> = {
         selectSome: 'Some',
         selectNone: 'None',
         minSelection: 'Select at least 2 voicings.',
+        chordLibrary: 'Chord Library',
     },
     zh: {
         settings: '设置',
@@ -58,6 +62,7 @@ const translations: Record<Language, Translations> = {
         key: '调号',
         replayChord: '重播和弦',
         replay: '重播声音', // Added this line
+        next: '下一题',
         correct: '回答正确! 🎉',
         incorrect: '回答错误! ❌',
         tryAgain: '请重试!',
@@ -69,6 +74,7 @@ const translations: Record<Language, Translations> = {
         selectSome: '部分',
         selectNone: '无',
         minSelection: '请至少选择 2 个指法。',
+        chordLibrary: '和弦库',
     }
 };
 
