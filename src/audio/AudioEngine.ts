@@ -1,10 +1,9 @@
 import * as Tone from "tone";
 
 class AudioEngine {
-    private voices: Tone.PluckSynth[] = [];
-    private currentVoiceIndex = 0;
+    private sampler: Tone.Sampler | null = null;
     private isInitialized = false;
-    private readonly NUM_VOICES = 6; // Standard guitar has 6 strings
+    private isLoaded = false;
 
     constructor() {
         // Singleton pattern
@@ -17,73 +16,72 @@ class AudioEngine {
 
         // Create effects chain
         const reverb = new Tone.Reverb({
-            decay: 2.0,
+            decay: 1.5,
             preDelay: 0.01,
-            wet: 0.3
+            wet: 0.2
         }).toDestination();
 
         const eq = new Tone.EQ3({
-            low: -3,
-            mid: 3,
-            high: 3
+            low: -2,
+            mid: 1,
+            high: 2
         });
 
-        // 在 init() 内
-        const gainNode = new Tone.Gain(1).toDestination(); // 0.5 表示 50% 音量
-
+        const gainNode = new Tone.Gain(0.8).toDestination();
 
         eq.connect(reverb);
         reverb.connect(gainNode);
 
-        // Create a pool of PluckSynth voices
-        for (let i = 0; i < this.NUM_VOICES; i++) {
-            const voice = new Tone.PluckSynth({
-                attackNoise: 0.3,   // 拨片摩擦感（比手指大）
-                dampening: 3500,    // 钢弦亮度
-                resonance: 0.95,    // 琴体共鸣
-                volume: 4           // 基础音量
-            });
-            voice.connect(eq);
-            voice.connect(gainNode);
-            voice.volume.value = 3;
-            this.voices.push(voice);
-        }
+        // Use Tone.Sampler with acoustic guitar samples (from tonejs-instruments source)
+        this.sampler = new Tone.Sampler({
+            urls: {
+                "E2": "E2.mp3",
+                "A2": "A2.mp3",
+                "D3": "D3.mp3",
+                "G3": "G3.mp3",
+                "B3": "B3.mp3",
+                "E4": "E4.mp3",
+                "C3": "C3.mp3",
+                "F3": "F3.mp3",
+                "A3": "A3.mp3",
+                "C4": "C4.mp3",
+                "F4": "F4.mp3",
+                "A4": "A4.mp3",
+                "C5": "C5.mp3"
+            },
+            release: 1,
+            baseUrl: "https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/acoustic_guitar_steel-mp3/",
+            onload: () => {
+                this.isLoaded = true;
+                console.log("Guitar samples loaded");
+            }
+        });
+
+        this.sampler.connect(eq);
+        this.sampler.connect(gainNode);
 
         this.isInitialized = true;
-    }
-
-    private getNextVoice(): Tone.PluckSynth | null {
-        if (this.voices.length === 0) return null;
-        const voice = this.voices[this.currentVoiceIndex];
-        this.currentVoiceIndex = (this.currentVoiceIndex + 1) % this.voices.length;
-        return voice;
     }
 
     /**
      * Play a chord simultaneously
      */
     playChord(notes: string[], duration: Tone.Unit.Time = "1n") {
-        if (!this.isInitialized) return;
-
-        notes.forEach(note => {
-            const voice = this.getNextVoice();
-            voice?.triggerAttackRelease(note, duration);
-        });
+        if (!this.sampler || !this.isLoaded) return;
+        this.sampler.triggerAttackRelease(notes, duration);
     }
 
     /**
      * Simulate a strum
      */
     async strumChord(notes: string[], duration: Tone.Unit.Time = "1n", strumSpeed: number = 0.06) {
-        if (!this.isInitialized) return;
+        if (!this.sampler || !this.isLoaded) return;
 
         const now = Tone.now();
         const speed = strumSpeed + (Math.random() * 0.02 - 0.01); // Randomize speed slightly
 
         notes.forEach((note, index) => {
-            const voice = this.getNextVoice();
-            // PluckSynth triggerAttackRelease signature: (note, duration, time)
-            voice?.triggerAttackRelease(note, duration, now + index * speed);
+            this.sampler!.triggerAttackRelease(note, duration, now + index * speed);
         });
     }
 
@@ -98,24 +96,21 @@ class AudioEngine {
         sustainSeconds: number = 1,
         strumDuration: number = 0.2
     ) {
-        if (!this.isInitialized) return;
+        if (!this.sampler || !this.isLoaded) return;
 
         const now = Tone.now();
         // Calculate interval between each string based on total strum duration
-        // If only 1 note, interval is 0.
         const interval = notes.length > 1 ? strumDuration / (notes.length - 1) : 0;
 
         notes.forEach((note, index) => {
-            const voice = this.getNextVoice();
-            if (!voice) return;
+            // Randomize velocity slightly for realism
+            const velocity = 0.8 + Math.random() * 0.2;
 
-            // 模拟拨片力度差异
-            voice.volume.value = 4 + Math.random() * 2;
-
-            voice.triggerAttackRelease(
+            this.sampler!.triggerAttackRelease(
                 note,
-                sustainSeconds,          // ⭐ 延音核心
-                now + index * interval   // 依次拨响
+                sustainSeconds,
+                now + index * interval,
+                velocity
             );
         });
     }
@@ -124,9 +119,8 @@ class AudioEngine {
      * Play a single note
      */
     playNote(note: string, duration: Tone.Unit.Time = "2n") {
-        if (!this.isInitialized) return;
-        const voice = this.getNextVoice();
-        voice?.triggerAttackRelease(note, duration);
+        if (!this.sampler || !this.isLoaded) return;
+        this.sampler.triggerAttackRelease(note, duration);
     }
 }
 
