@@ -148,5 +148,6 @@ export function generateVoicings(root: string, quality: string, keyRoot: string)
         });
     });
 
-    return voicings;
+    // Sort voicings by position (low to high)
+    return voicings.sort((a, b) => (a.position || 0) - (b.position || 0));
 }

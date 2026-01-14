@@ -13,6 +13,7 @@ function AppContent() {
   const [selectedVoicingIds, setSelectedVoicingIds] = useState<string[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   const [currentVoicing, setCurrentVoicing] = useState<ChordVoicing | null>(null);
 
@@ -73,10 +74,17 @@ function AppContent() {
   };
 
   const playVoicing = useCallback(async (voicing: ChordVoicing) => {
+    if (isAudioPlaying) return;
+    setIsAudioPlaying(true);
     await audioEngine.init();
     // 1s sustain, 0.2s strum duration
     audioEngine.downStrumWithPick(voicing.notes, 1, 0.2);
-  }, []);
+
+    // Set isAudioPlaying to false after the sound is mostly done (strum + sustain)
+    setTimeout(() => {
+      setIsAudioPlaying(false);
+    }, 1200);
+  }, [isAudioPlaying]);
 
   // Game state now tracks specific voicings as options
   const [gameOptions, setGameOptions] = useState<{ voicing: ChordVoicing, chordName: string }[]>([]);
@@ -106,6 +114,10 @@ function AppContent() {
       setIsDrawerOpen(true); // Open drawer when stopping
       setGameOptions([]); // Reset game options
     } else {
+      if (selectedVoicingIds.length < 2) {
+        alert(language === 'en' ? "Please select at least 2 chords to start." : "请至少选择2个和弦开始练习。");
+        return;
+      }
       // Build game options from selected voicings
       const options: { voicing: ChordVoicing, chordName: string }[] = [];
 
@@ -209,6 +221,7 @@ function AppContent() {
             onReplay={handleReplay}
             onNext={nextRound}
             lastGuessedName={lastGuessedName}
+            isAudioPlaying={isAudioPlaying}
           />
         )}
       </div>

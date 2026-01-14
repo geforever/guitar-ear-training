@@ -13,6 +13,7 @@ interface QuizAreaProps {
     onReplay: () => void;
     onNext: () => void; // Added onNext prop
     lastGuessedName: string | null;
+    isAudioPlaying: boolean;
 }
 
 const QuizArea: React.FC<QuizAreaProps> = ({
@@ -22,7 +23,8 @@ const QuizArea: React.FC<QuizAreaProps> = ({
     feedback,
     onReplay,
     onNext,
-    lastGuessedName
+    lastGuessedName,
+    isAudioPlaying
 }) => {
     const { t } = useLanguage();
 
@@ -34,7 +36,8 @@ const QuizArea: React.FC<QuizAreaProps> = ({
             <div className="mb-6 flex-shrink-0 flex gap-4">
                 <button
                     onClick={onReplay}
-                    className="px-6 py-3 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 rounded-full shadow-sm transition-all flex items-center gap-2 font-bold"
+                    disabled={isAudioPlaying}
+                    className={`px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-full shadow-sm transition-all flex items-center gap-2 font-bold ${isAudioPlaying ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
                 >
                     <Play size={20} className="fill-current" />
                     {t.replay}

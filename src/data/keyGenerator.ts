@@ -47,8 +47,9 @@ export function generateKeyData(root: string, scaleType: 'major' | 'minor' = 'ma
             });
         }
 
-        // 3. Sus Chords (I, IV, V)
-        if (degree === 1 || degree === 2 || degree === 5) { // I, II, V have perfect 5ths and major 2nds usually
+        // 3. Sus Chords (I, IV, V) - Only for Major chords
+        // We check if the basic triad quality is 'major' or 'dominant' (which has major 3rd)
+        if (triadQuality === 'major' || triadQuality === 'dominant') {
             chords.push({
                 name: note + 'sus2',
                 quality: 'sus',
