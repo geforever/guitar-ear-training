@@ -73,7 +73,8 @@ function AppContent() {
 
   const playVoicing = useCallback(async (voicing: ChordVoicing) => {
     await audioEngine.init();
-    audioEngine.strumChord(voicing.notes, "1n", 0.06);
+    // 1s sustain, 0.2s strum duration
+    audioEngine.downStrumWithPick(voicing.notes, 1, 0.2);
   }, []);
 
   // Game state now tracks specific voicings as options

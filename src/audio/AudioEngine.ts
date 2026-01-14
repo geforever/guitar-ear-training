@@ -1,8 +1,10 @@
-import * as Tone from 'tone';
+import * as Tone from "tone";
 
 class AudioEngine {
-    private synth: Tone.PolySynth | null = null;
+    private voices: Tone.PluckSynth[] = [];
+    private currentVoiceIndex = 0;
     private isInitialized = false;
+    private readonly NUM_VOICES = 6; // Standard guitar has 6 strings
 
     constructor() {
         // Singleton pattern
@@ -13,58 +15,118 @@ class AudioEngine {
 
         await Tone.start();
 
-        // Using a PolySynth with a custom synth to simulate a plucked string
-        // A "pluck" usually has a sharp attack and a decay.
-        this.synth = new Tone.PolySynth(Tone.Synth, {
-            oscillator: {
-                type: "triangle" // Triangle is good for guitar body
-            },
-            envelope: {
-                attack: 0.005, // Very fast attack for the "pick" sound
-                decay: 0.3,    // Quick initial decay
-                sustain: 0.1,  // Low sustain
-                release: 1.5   // Long release for ringing out
-            }
-        }).toDestination();
-
-        // Add some effects for realism
+        // Create effects chain
         const reverb = new Tone.Reverb({
             decay: 2.0,
             preDelay: 0.01,
             wet: 0.3
         }).toDestination();
 
-        // A subtle EQ to boost mids/highs for "pick" definition
         const eq = new Tone.EQ3({
             low: -3,
-            mid: 2,
+            mid: 3,
             high: 3
-        }).toDestination();
+        });
 
-        this.synth.connect(eq);
+        // 在 init() 内
+        const gainNode = new Tone.Gain(1).toDestination(); // 0.5 表示 50% 音量
+
+
         eq.connect(reverb);
+        reverb.connect(gainNode);
+
+        // Create a pool of PluckSynth voices
+        for (let i = 0; i < this.NUM_VOICES; i++) {
+            const voice = new Tone.PluckSynth({
+                attackNoise: 0.3,   // 拨片摩擦感（比手指大）
+                dampening: 3500,    // 钢弦亮度
+                resonance: 0.95,    // 琴体共鸣
+                volume: 4           // 基础音量
+            });
+            voice.connect(eq);
+            voice.connect(gainNode);
+            voice.volume.value = 3;
+            this.voices.push(voice);
+        }
 
         this.isInitialized = true;
     }
 
-    playChord(notes: string[], duration: string = "1n") {
-        if (!this.synth) return;
-        this.synth.triggerAttackRelease(notes, duration);
+    private getNextVoice(): Tone.PluckSynth | null {
+        if (this.voices.length === 0) return null;
+        const voice = this.voices[this.currentVoiceIndex];
+        this.currentVoiceIndex = (this.currentVoiceIndex + 1) % this.voices.length;
+        return voice;
     }
 
-    // Simulate a strum
-    async strumChord(notes: string[], duration: string = "1n", strumSpeed: number = 0.06) {
-        if (!this.synth) return;
+    /**
+     * Play a chord simultaneously
+     */
+    playChord(notes: string[], duration: Tone.Unit.Time = "1n") {
+        if (!this.isInitialized) return;
+
+        notes.forEach(note => {
+            const voice = this.getNextVoice();
+            voice?.triggerAttackRelease(note, duration);
+        });
+    }
+
+    /**
+     * Simulate a strum
+     */
+    async strumChord(notes: string[], duration: Tone.Unit.Time = "1n", strumSpeed: number = 0.06) {
+        if (!this.isInitialized) return;
 
         const now = Tone.now();
-        // Randomize strum speed slightly for human feel
-        const speed = strumSpeed + (Math.random() * 0.02 - 0.01);
+        const speed = strumSpeed + (Math.random() * 0.02 - 0.01); // Randomize speed slightly
 
         notes.forEach((note, index) => {
-            // Add tiny random velocity variation
-            const velocity = 0.8 + Math.random() * 0.2;
-            this.synth!.triggerAttackRelease(note, duration, now + index * speed, velocity);
+            const voice = this.getNextVoice();
+            // PluckSynth triggerAttackRelease signature: (note, duration, time)
+            voice?.triggerAttackRelease(note, duration, now + index * speed);
         });
+    }
+
+    /**
+     * 使用拨片从上往下扫弦（Downstroke）
+     * @param notes 吉他和弦音符（低音 → 高音）
+     * @param sustainSeconds 整体扫弦持续时间（秒），默认 1 秒
+     * @param strumDuration 扫弦动作的总时间（秒），默认 0.2 秒
+     */
+    downStrumWithPick(
+        notes: string[],
+        sustainSeconds: number = 1,
+        strumDuration: number = 0.2
+    ) {
+        if (!this.isInitialized) return;
+
+        const now = Tone.now();
+        // Calculate interval between each string based on total strum duration
+        // If only 1 note, interval is 0.
+        const interval = notes.length > 1 ? strumDuration / (notes.length - 1) : 0;
+
+        notes.forEach((note, index) => {
+            const voice = this.getNextVoice();
+            if (!voice) return;
+
+            // 模拟拨片力度差异
+            voice.volume.value = 4 + Math.random() * 2;
+
+            voice.triggerAttackRelease(
+                note,
+                sustainSeconds,          // ⭐ 延音核心
+                now + index * interval   // 依次拨响
+            );
+        });
+    }
+
+    /**
+     * Play a single note
+     */
+    playNote(note: string, duration: Tone.Unit.Time = "2n") {
+        if (!this.isInitialized) return;
+        const voice = this.getNextVoice();
+        voice?.triggerAttackRelease(note, duration);
     }
 }
 
