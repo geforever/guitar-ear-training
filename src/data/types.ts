@@ -1,4 +1,4 @@
-export type ChordQuality = 'major' | 'minor' | 'dominant' | 'sus' | 'dim' | 'aug';
+export type ChordQuality = 'major' | 'minor' | 'dominant' | 'sus' | 'dim' | 'aug' | 'maj7' | 'm7' | 'm7b5' | 'sus2' | 'sus4';
 
 export interface ChordVoicing {
     id: string;

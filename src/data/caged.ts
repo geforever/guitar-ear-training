@@ -90,7 +90,7 @@ export function generateVoicings(root: string, quality: string, keyRoot: string)
     shapes.forEach(shape => {
         // Find the fret for the root on the shape's root string
         // String 6: E (4), String 5: A (9), String 4: D (2)
-        const stringOpenNoteIdx = STRING_ROOTS[shape.rootString - 1];
+        const stringOpenNoteIdx = STRING_ROOTS[6 - shape.rootString];
 
         // Calculate fret needed for the root
         // rootIdx = (stringOpenNoteIdx + fret) % 12
