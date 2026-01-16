@@ -48,7 +48,7 @@ const translations: Record<Language, Translations> = {
         useHeadphones: 'Use headphones for best experience 🎧',
         selectAll: 'All',
         selectSome: 'Some',
-        selectNone: 'None',
+        selectNone: 'Clear',
         minSelection: 'Select at least 2 voicings.',
         chordLibrary: 'Chord Library',
     },
@@ -72,7 +72,7 @@ const translations: Record<Language, Translations> = {
         useHeadphones: '佩戴耳机体验更佳 🎧',
         selectAll: '全选',
         selectSome: '部分',
-        selectNone: '无',
+        selectNone: '清空',
         minSelection: '请至少选择 2 个指法。',
         chordLibrary: '和弦库',
     }
