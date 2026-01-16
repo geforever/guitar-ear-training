@@ -9,58 +9,70 @@ class AudioEngine {
         // Singleton pattern
     }
 
+    private loadPromise: Promise<void> | null = null;
+
     async init() {
-        if (this.isInitialized) return;
+        if (this.loadPromise) return this.loadPromise;
 
-        await Tone.start();
-
-        // Create effects chain
-        const reverb = new Tone.Reverb({
-            decay: 1.5,
-            preDelay: 0.01,
-            wet: 0.2
-        }).toDestination();
-
-        const eq = new Tone.EQ3({
-            low: -2,
-            mid: 1,
-            high: 2
-        });
-
-        const gainNode = new Tone.Gain(0.8).toDestination();
-
-        eq.connect(reverb);
-        reverb.connect(gainNode);
-
-        // Use Tone.Sampler with acoustic guitar samples (from tonejs-instruments source)
-        this.sampler = new Tone.Sampler({
-            urls: {
-                "E2": "E2.mp3",
-                "A2": "A2.mp3",
-                "D3": "D3.mp3",
-                "G3": "G3.mp3",
-                "B3": "B3.mp3",
-                "E4": "E4.mp3",
-                "C3": "C3.mp3",
-                "F3": "F3.mp3",
-                "A3": "A3.mp3",
-                "C4": "C4.mp3",
-                "F4": "F4.mp3",
-                "A4": "A4.mp3",
-                "C5": "C5.mp3"
-            },
-            release: 1,
-            baseUrl: "https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/acoustic_guitar_steel-mp3/",
-            onload: () => {
-                this.isLoaded = true;
-                console.log("Guitar samples loaded");
+        this.loadPromise = new Promise(async (resolve) => {
+            if (this.isInitialized && this.isLoaded) {
+                resolve();
+                return;
             }
+
+            await Tone.start();
+
+            // Create effects chain
+            const reverb = new Tone.Reverb({
+                decay: 1.5,
+                preDelay: 0.01,
+                wet: 0.2
+            }).toDestination();
+
+            const eq = new Tone.EQ3({
+                low: -2,
+                mid: 1,
+                high: 2
+            });
+
+            const gainNode = new Tone.Gain(0.8).toDestination();
+
+            eq.connect(reverb);
+            reverb.connect(gainNode);
+
+            // Use Tone.Sampler with acoustic guitar samples
+            this.sampler = new Tone.Sampler({
+                urls: {
+                    "E2": "E2.mp3",
+                    "A2": "A2.mp3",
+                    "D3": "D3.mp3",
+                    "G3": "G3.mp3",
+                    "B3": "B3.mp3",
+                    "E4": "E4.mp3",
+                    "C3": "C3.mp3",
+                    "F3": "F3.mp3",
+                    "A3": "A3.mp3",
+                    "C4": "C4.mp3",
+                    "F4": "F4.mp3",
+                    "A4": "A4.mp3",
+                    "C5": "C5.mp3"
+                },
+                release: 1,
+                baseUrl: "https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/acoustic_guitar_steel-mp3/",
+                onload: () => {
+                    this.isLoaded = true;
+                    console.log("Guitar samples loaded");
+                    resolve();
+                }
+            });
+
+            this.sampler.connect(eq);
+            this.sampler.connect(gainNode);
+
+            this.isInitialized = true;
         });
 
-        this.sampler.connect(eq);
-        this.sampler.connect(gainNode);
-
-        this.isInitialized = true;
+        return this.loadPromise;
     }
 
     /**
