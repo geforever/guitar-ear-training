@@ -1,73 +1,99 @@
-# React + TypeScript + Vite
+# Ear Training - Guitar Chord Ear Trainer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[中文版](#中文) | [English](#english)
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<a name="english"></a>
 
-## React Compiler
+## English
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Project Overview
+**Ear Training** is a web-based interactive application designed to help guitarists improve their chord recognition skills. Built with modern web technologies, it focuses on the **CAGED system**, providing a structured way to learn and identify chord voicings across the fretboard.
 
-## Expanding the ESLint configuration
+### Key Features
+- **CAGED System Integration**: Practice chord voicings based on the standard E, A, D, G, and C shapes.
+- **Multi-Key Support**: Practice in all 12 major keys.
+- **Customizable Practice**: Select up to 12 specific chord voicings to focus your training.
+- **Interactive Quiz**: Listen to chord strums and identify the correct voicing.
+- **High-Quality Audio**: Powered by Tone.js for realistic guitar sound synthesis.
+- **Bilingual Interface**: Seamlessly switch between English and Chinese.
+- **Modern UI/UX**: Clean, responsive design with smooth animations using Framer Motion and Tailwind CSS.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Tech Stack
+- **Framework**: React 19
+- **Build Tool**: Vite
+- **Language**: TypeScript
+- **Audio Engine**: Tone.js
+- **Styling**: Tailwind CSS
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+#### Prerequisites
+- Node.js (Latest LTS recommended)
+- npm or yarn
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+#### Installation
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd ear-training
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+<a name="zh"></a>
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 中文
+
+### 项目简介
+**Ear Training** 是一款基于 Web 的交互式应用，旨在帮助吉他手提高和弦听音辨识能力。该项目采用现代 Web 技术构建，核心围绕 **CAGED 系统**，为学习和识别指板上的各种和弦指型提供了一种结构化的练习方式。
+
+### 核心功能
+- **CAGED 系统集成**: 练习基于标准 E、A、D、G 和 C 指型的和弦。
+- **全调性支持**: 支持所有 12 个大调的练习。
+- **自定义练习**: 最多可选择 12 个特定的和弦指型进行针对性训练。
+- **交互式测试**: 聆听和弦扫弦声并识别正确的指型。
+- **高质量音频**: 采用 Tone.js 驱动，实现真实的吉他音色合成。
+- **双语界面**: 英文与中文无缝切换。
+- **现代 UI/UX**: 使用 Framer Motion 和 Tailwind CSS 构建，界面简洁、响应迅速且动画流畅。
+
+### 技术栈
+- **框架**: React 19
+- **构建工具**: Vite
+- **语言**: TypeScript
+- **音频引擎**: Tone.js
+- **样式**: Tailwind CSS
+- **动画**: Framer Motion
+- **图标**: Lucide React
+
+### 快速开始
+
+#### 环境要求
+- Node.js (推荐最新的 LTS 版本)
+- npm 或 yarn
+
+#### 安装步骤
+1. 克隆仓库:
+   ```bash
+   git clone <repository-url>
+   cd ear-training
+   ```
+2. 安装依赖:
+   ```bash
+   npm install
+   ```
+3. 启动开发服务器:
+   ```bash
+   npm run dev
+   ```
