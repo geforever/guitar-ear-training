@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { RootGroup, Chord } from '../data/chords';
 import Fretboard from './Fretboard';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -24,7 +24,13 @@ const GameControls: React.FC<GameControlsProps> = ({
     onClearAll
 }) => {
     const { t } = useLanguage();
-    const [scaleType, setScaleType] = useState<'major' | 'minor'>('major'); // UI Toggle only for now
+    const currentMode = selectedKey.includes('Minor') ? 'minor' : 'major';
+
+    const handleModeToggle = (newMode: 'major' | 'minor') => {
+        if (newMode === currentMode) return;
+        const root = selectedKey.replace(' Major', '').replace(' Minor', '');
+        onKeyChange(`${root} ${newMode === 'major' ? 'Major' : 'Minor'}`);
+    };
 
     return (
         <div className="flex flex-col gap-8 pb-10">
@@ -37,20 +43,19 @@ const GameControls: React.FC<GameControlsProps> = ({
                 {/* Circle of Fifths Selector */}
                 <div className="mb-8 flex flex-col items-center">
                     <label className="block text-sm font-medium text-gray-500 mb-2">{t.selectKey}</label>
-                    <CircleOfFifths selectedKey={selectedKey} onKeySelect={onKeyChange} />
+                    <CircleOfFifths selectedKey={selectedKey} onKeySelect={onKeyChange} mode={currentMode} />
 
                     {/* Major/Minor Toggle */}
                     <div className="flex bg-gray-100 p-1 rounded-lg mt-4">
                         <button
-                            onClick={() => setScaleType('major')}
-                            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${scaleType === 'major' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            onClick={() => handleModeToggle('major')}
+                            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentMode === 'major' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                             Major
                         </button>
                         <button
-                            onClick={() => setScaleType('minor')}
-                            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${scaleType === 'minor' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                            title="Coming Soon"
+                            onClick={() => handleModeToggle('minor')}
+                            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentMode === 'minor' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                             Minor
                         </button>
@@ -79,63 +84,69 @@ const GameControls: React.FC<GameControlsProps> = ({
                         </span>
                     </div>
 
-                    {rootGroups.map((group) => (
-                        <div key={group.root} className="space-y-3">
-                            {/* Root Header (No "Family" suffix) */}
-                            <div className="flex items-center gap-4">
-                                <div className="h-px bg-gray-200 flex-1"></div>
-                                <span className="font-bold text-xl text-gray-400">{group.root}</span>
-                                <div className="h-px bg-gray-200 flex-1"></div>
-                            </div>
+                    {rootGroups.map((group) => {
+                        // Filter out chords with no playable voicings
+                        const playableChords = group.chords.filter(c => c.voicings.length > 0);
+                        if (playableChords.length === 0) return null;
 
-                            <div className="grid grid-cols-1 gap-4">
-                                {group.chords.map(chord => (
-                                    <div key={chord.name} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                                        <div className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-100">
-                                            <h4 className="font-bold text-gray-800">{chord.name}</h4>
-                                            <button
-                                                onClick={() => onToggleChordAll(chord)}
-                                                className="text-xs px-2 py-1 bg-white border border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 rounded transition-colors"
-                                            >
-                                                {t.selectAll}
-                                            </button>
+                        return (
+                            <div key={group.root} className="space-y-3">
+                                {/* Root Header (No "Family" suffix) */}
+                                <div className="flex items-center gap-4">
+                                    <div className="h-px bg-gray-200 flex-1"></div>
+                                    <span className="font-bold text-xl text-gray-400">{group.root}</span>
+                                    <div className="h-px bg-gray-200 flex-1"></div>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4">
+                                    {playableChords.map(chord => (
+                                        <div key={chord.name} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                                            <div className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-100">
+                                                <h4 className="font-bold text-gray-800">{chord.name}</h4>
+                                                <button
+                                                    onClick={() => onToggleChordAll(chord)}
+                                                    className="text-xs px-2 py-1 bg-white border border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 rounded transition-colors"
+                                                >
+                                                    {t.selectAll}
+                                                </button>
+                                            </div>
+
+                                            <div className="p-3 grid grid-cols-2 gap-3">
+                                                {chord.voicings.map(voicing => {
+                                                    const isSelected = selectedVoicingIds.includes(voicing.id);
+                                                    return (
+                                                        <button
+                                                            key={voicing.id}
+                                                            onClick={() => onToggleVoicing(voicing.id)}
+                                                            className={`
+                                                                relative flex flex-col items-center p-2 rounded-lg border transition-all group
+                                                                ${isSelected
+                                                                    ? 'border-blue-500 bg-blue-50/50'
+                                                                    : 'border-gray-100 bg-white hover:border-gray-300 hover:shadow-md'
+                                                                }
+                                                            `}
+                                                        >
+                                                            <div className="w-full flex justify-between items-start mb-2">
+                                                                <span className={`text-[10px] font-medium uppercase tracking-wider ${isSelected ? 'text-blue-600' : 'text-gray-400'}`}>
+                                                                    {voicing.label || 'Voicing'}
+                                                                </span>
+                                                                {isSelected && <Check size={14} className="text-blue-500" />}
+                                                            </div>
+
+                                                            {/* Fretboard Diagram */}
+                                                            <div className={`transition-opacity ${isSelected ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}>
+                                                                <Fretboard voicing={voicing} name="" width={80} height={100} />
+                                                            </div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
-
-                                        <div className="p-3 grid grid-cols-2 gap-3">
-                                            {chord.voicings.map(voicing => {
-                                                const isSelected = selectedVoicingIds.includes(voicing.id);
-                                                return (
-                                                    <button
-                                                        key={voicing.id}
-                                                        onClick={() => onToggleVoicing(voicing.id)}
-                                                        className={`
-                                                            relative flex flex-col items-center p-2 rounded-lg border transition-all group
-                                                            ${isSelected
-                                                                ? 'border-blue-500 bg-blue-50/50'
-                                                                : 'border-gray-100 bg-white hover:border-gray-300 hover:shadow-md'
-                                                            }
-                                                        `}
-                                                    >
-                                                        <div className="w-full flex justify-between items-start mb-2">
-                                                            <span className={`text-[10px] font-medium uppercase tracking-wider ${isSelected ? 'text-blue-600' : 'text-gray-400'}`}>
-                                                                {voicing.label || 'Voicing'}
-                                                            </span>
-                                                            {isSelected && <Check size={14} className="text-blue-500" />}
-                                                        </div>
-
-                                                        {/* Fretboard Diagram */}
-                                                        <div className={`transition-opacity ${isSelected ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}>
-                                                            <Fretboard voicing={voicing} name="" width={80} height={100} />
-                                                        </div>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 

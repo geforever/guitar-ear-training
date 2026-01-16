@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 interface CircleOfFifthsProps {
     selectedKey: string;
     onKeySelect: (key: string) => void;
+    mode: 'major' | 'minor';
 }
 
 const KEYS = [
@@ -21,9 +22,9 @@ const KEYS = [
     { name: 'F', label: 'F', angle: 240 },
 ];
 
-const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({ selectedKey, onKeySelect }) => {
-    // Normalize selected key (remove " Major" suffix if present for comparison)
-    const currentRoot = selectedKey.replace(' Major', '');
+const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({ selectedKey, onKeySelect, mode }) => {
+    // Normalize selected key (remove " Major" or " Minor" suffix if present for comparison)
+    const currentRoot = selectedKey.replace(' Major', '').replace(' Minor', '');
 
     return (
         <div className="relative w-64 h-64 mx-auto my-6">
@@ -55,7 +56,7 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({ selectedKey, onKeySelec
                     const y = 50 + radius * Math.sin(rad);
 
                     return (
-                        <g key={k.name} onClick={() => onKeySelect(`${k.name} Major`)} className="cursor-pointer group">
+                        <g key={k.name} onClick={() => onKeySelect(`${k.name} ${mode === 'major' ? 'Major' : 'Minor'}`)} className="cursor-pointer group">
                             {/* Highlight Circle */}
                             <motion.circle
                                 cx={x}
@@ -83,7 +84,7 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({ selectedKey, onKeySelec
 
                 {/* Center Label */}
                 <text x="50" y="50" dy="0.35em" textAnchor="middle" className="text-[6px] fill-gray-400 font-medium">
-                    Major Keys
+                    {mode === 'major' ? 'Major Keys' : 'Minor Keys'}
                 </text>
             </svg>
         </div>

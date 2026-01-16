@@ -57,7 +57,7 @@ const SHAPE_LIBRARY: Record<string, ShapeDef[]> = {
         { id: 'C7-shape', rootString: 5, frets: [-1, 3, 2, 3, 1, -1], rootFretOffset: 3, label: 'C7-shape' },
     ],
     'maj7': [
-        { id: 'Emaj7-shape', rootString: 6, frets: [0, 2, 1, 1, 0, 0], rootFretOffset: 0, label: 'Emaj7-shape' }, // Hard barre, usually shell
+        { id: 'Emaj7-shape', rootString: 6, frets: [0, -1, 1, 1, 0, -1], rootFretOffset: 0, label: 'Emaj7-shape' }, // Simplified shell
         { id: 'Amaj7-shape', rootString: 5, frets: [-1, 0, 2, 1, 2, 0], rootFretOffset: 0, label: 'Amaj7-shape' },
         { id: 'Dmaj7-shape', rootString: 4, frets: [-1, -1, 0, 2, 2, 2], rootFretOffset: 0, label: 'Dmaj7-shape' },
         { id: 'Cmaj7-shape', rootString: 5, frets: [-1, 3, 2, 0, 0, 0], rootFretOffset: 3, label: 'Cmaj7-shape' },
@@ -76,6 +76,46 @@ const SHAPE_LIBRARY: Record<string, ShapeDef[]> = {
         { id: 'Esus2-shape', rootString: 6, frets: [0, 2, 4, 4, 0, 0], rootFretOffset: 0, label: 'Esus2-shape' }, // Stretch
         { id: 'Asus2-shape', rootString: 5, frets: [-1, 0, 2, 2, 0, 0], rootFretOffset: 0, label: 'Asus2-shape' },
         { id: 'Dsus2-shape', rootString: 4, frets: [-1, -1, 0, 2, 3, 0], rootFretOffset: 0, label: 'Dsus2-shape' },
+    ],
+    '6': [
+        { id: 'E6-shape', rootString: 6, frets: [0, -1, 2, 1, 2, 0], rootFretOffset: 0, label: 'E6-shape' }, // Simplified (omit 5th)
+        { id: 'A6-shape', rootString: 5, frets: [-1, 0, 2, 2, 2, 2], rootFretOffset: 0, label: 'A6-shape' },
+        { id: 'C6-shape', rootString: 5, frets: [-1, 3, 2, 2, 1, -1], rootFretOffset: 3, label: 'C6-shape' },
+    ],
+    'm6': [
+        { id: 'Em6-shape', rootString: 6, frets: [0, 2, 2, 0, 2, 0], rootFretOffset: 0, label: 'Em6-shape' },
+        { id: 'Am6-shape', rootString: 5, frets: [-1, 0, 2, 2, 1, 2], rootFretOffset: 0, label: 'Am6-shape' },
+    ],
+    'maj9': [
+        { id: 'Amaj9-shape', rootString: 5, frets: [-1, 0, 2, 1, 0, 0], rootFretOffset: 0, label: 'Amaj9-shape' },
+        { id: 'Cmaj9-shape', rootString: 5, frets: [-1, 3, 2, 4, 3, -1], rootFretOffset: 3, label: 'Cmaj9-shape' },
+    ],
+    '9': [
+        { id: 'E9-shape', rootString: 6, frets: [0, -1, 0, 1, 0, 2], rootFretOffset: 0, label: 'E9-shape' },
+        { id: 'C9-shape', rootString: 5, frets: [-1, 3, 2, 3, 3, -1], rootFretOffset: 3, label: 'C9-shape' },
+    ],
+    'm9': [
+        { id: 'Am9-shape', rootString: 5, frets: [-1, 0, 2, 0, 1, 3], rootFretOffset: 0, label: 'Am9-shape' },
+        { id: 'Cm9-shape', rootString: 5, frets: [-1, 3, 1, 3, 3, -1], rootFretOffset: 3, label: 'Cm9-shape' },
+    ],
+    '11': [
+        { id: 'A11-shape', rootString: 5, frets: [-1, 0, 0, 0, 0, 0], rootFretOffset: 0, label: 'A11-shape' },
+    ],
+    'm11': [
+        { id: 'Em11-shape', rootString: 6, frets: [0, 0, 0, 0, 0, 0], rootFretOffset: 0, label: 'Em11-shape' },
+        { id: 'Am11-shape', rootString: 5, frets: [-1, 0, 0, 0, 1, 0], rootFretOffset: 0, label: 'Am11-shape' },
+    ],
+    '13': [
+        { id: 'E13-shape', rootString: 6, frets: [0, -1, 0, 1, 2, 0], rootFretOffset: 0, label: 'E13-shape' }, // Simplified
+        { id: 'A13-shape', rootString: 5, frets: [-1, 0, 2, 0, 2, 2], rootFretOffset: 0, label: 'A13-shape' },
+    ],
+    'maj13': [
+        { id: 'Amaj13-shape', rootString: 5, frets: [-1, 0, 2, 1, 2, 2], rootFretOffset: 0, label: 'Amaj13-shape' },
+        { id: 'Emaj13-shape', rootString: 6, frets: [0, -1, 1, 1, 2, -1], rootFretOffset: 0, label: 'Emaj13-shape' },
+    ],
+    'add9': [
+        { id: 'Eadd9-shape', rootString: 6, frets: [0, 2, 4, 1, 0, 0], rootFretOffset: 0, label: 'Eadd9-shape' },
+        { id: 'Aadd9-shape', rootString: 5, frets: [-1, 0, 2, 4, 2, 0], rootFretOffset: 0, label: 'Aadd9-shape' },
     ]
 };
 
@@ -86,6 +126,7 @@ export function generateVoicings(root: string, quality: string, keyRoot: string)
     const rootIdx = getNoteIndex(root);
     const shapes = SHAPE_LIBRARY[quality] || SHAPE_LIBRARY['major'];
     const voicings: ChordVoicing[] = [];
+    const seenFretPatterns = new Set<string>();
 
     shapes.forEach(shape => {
         // Find the fret for the root on the shape's root string
@@ -93,26 +134,12 @@ export function generateVoicings(root: string, quality: string, keyRoot: string)
         const stringOpenNoteIdx = STRING_ROOTS[6 - shape.rootString];
 
         // Calculate fret needed for the root
-        // rootIdx = (stringOpenNoteIdx + fret) % 12
-        // fret = (rootIdx - stringOpenNoteIdx + 12) % 12
         let rootFret = (rootIdx - stringOpenNoteIdx + 12) % 12;
 
         // Adjust for shape's internal offset
-        // The "Position" (barre) is at rootFret - shape.rootFretOffset
         let position = rootFret - shape.rootFretOffset;
 
-        // If position is negative, we might need to go up an octave?
-        // Or if it's an open chord, position 0 is valid.
-        // If position < 0, add 12.
         if (position < 0) position += 12;
-
-        // If position is too high (> 12), try to subtract 12 if possible (unlikely for guitar unless open)
-        // We prefer positions <= 12.
-        if (position > 9) { // Allow up to 9 (so highest fret is around 12-13)
-            // If it's > 9, maybe we can find a lower octave? 
-            // If we subtract 12, we might go negative.
-            // Let's just filter out high positions later.
-        }
 
         // Calculate actual frets
         const actualFrets = shape.frets.map(f => f === -1 ? -1 : f + position);
@@ -124,17 +151,35 @@ export function generateVoicings(root: string, quality: string, keyRoot: string)
             const maxFret = Math.max(...playedFrets);
             if (maxFret > 14) return; // Skip too high
             if (maxFret - minFret > 4) return; // Skip impossible stretches
+
+            // Additional check for "too many fingers" (e.g. barre + 4 fingers)
+            // A barre is assumed if multiple strings have the same fret value (minFret)
+            const uniqueFrets = new Set(playedFrets);
+            const nonBarreFrets = playedFrets.filter(f => f !== minFret);
+            const uniqueNonBarreFrets = new Set(nonBarreFrets);
+
+            // If we have a barre (more than one string at minFret), we have 3 fingers left.
+            // If we don't have a barre, we have 4 fingers total.
+            const hasBarre = playedFrets.filter(f => f === minFret).length > 1;
+            if (hasBarre) {
+                if (uniqueNonBarreFrets.size > 3) return;
+            } else {
+                if (uniqueFrets.size > 4) return;
+            }
         }
+
+        // Deduplication: check if we've seen this exact fret pattern
+        const fretPattern = actualFrets.join(',');
+        if (seenFretPatterns.has(fretPattern)) return;
+        seenFretPatterns.add(fretPattern);
 
         // Add octave numbers roughly
         const notesWithOctave = actualFrets.map((fret, stringIdx) => {
             if (fret === -1) return null;
-            // Calculate absolute semitones from C0?
-            // E2 is 40.
             const baseValues = [40, 45, 50, 55, 59, 64]; // E2, A2, D3, G3, B3, E4
             const absVal = baseValues[stringIdx] + fret;
             const noteName = getNoteName(absVal % 12, keyRoot);
-            const octave = Math.floor(absVal / 12) - 1; // MIDI to scientific? C4 is 60. 60/12 = 5. 5-1=4. Correct.
+            const octave = Math.floor(absVal / 12) - 1;
             return `${noteName}${octave}`;
         }).filter((n): n is string => n !== null);
 
@@ -143,7 +188,7 @@ export function generateVoicings(root: string, quality: string, keyRoot: string)
             id: `${root}-${quality}-${shape.id}`,
             frets: actualFrets,
             notes: notesWithOctave,
-            position: position === 0 ? 1 : position, // If open, position 1. If barre, position is fret.
+            position: position === 0 ? 1 : position,
             label: shape.label
         });
     });

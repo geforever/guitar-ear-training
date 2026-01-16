@@ -10,6 +10,10 @@ export const F_SHARP_MAJOR_KEY: Key = {
             chords: [
                 { name: 'F#', quality: 'major', voicings: generateVoicings('F#', 'major', 'F#') },
                 { name: 'F#maj7', quality: 'maj7', voicings: generateVoicings('F#', 'maj7', 'F#') },
+                { name: 'F#6', quality: '6', voicings: generateVoicings('F#', '6', 'F#') },
+                { name: 'F#add9', quality: 'add9', voicings: generateVoicings('F#', 'add9', 'F#') },
+                { name: 'F#maj9', quality: 'maj9', voicings: generateVoicings('F#', 'maj9', 'F#') },
+                { name: 'F#maj13', quality: 'maj13', voicings: generateVoicings('F#', 'maj13', 'F#') },
                 { name: 'F#sus2', quality: 'sus2', voicings: generateVoicings('F#', 'sus2', 'F#') },
                 { name: 'F#sus4', quality: 'sus4', voicings: generateVoicings('F#', 'sus4', 'F#') },
             ]
@@ -19,6 +23,9 @@ export const F_SHARP_MAJOR_KEY: Key = {
             chords: [
                 { name: 'G#m', quality: 'minor', voicings: generateVoicings('G#', 'minor', 'F#') },
                 { name: 'G#m7', quality: 'm7', voicings: generateVoicings('G#', 'm7', 'F#') },
+                { name: 'G#m6', quality: 'm6', voicings: generateVoicings('G#', 'm6', 'F#') },
+                { name: 'G#m9', quality: 'm9', voicings: generateVoicings('G#', 'm9', 'F#') },
+                { name: 'G#m11', quality: 'm11', voicings: generateVoicings('G#', 'm11', 'F#') },
             ]
         },
         {
@@ -26,6 +33,7 @@ export const F_SHARP_MAJOR_KEY: Key = {
             chords: [
                 { name: 'A#m', quality: 'minor', voicings: generateVoicings('A#', 'minor', 'F#') },
                 { name: 'A#m7', quality: 'm7', voicings: generateVoicings('A#', 'm7', 'F#') },
+                { name: 'A#m11', quality: 'm11', voicings: generateVoicings('A#', 'm11', 'F#') },
             ]
         },
         {
@@ -33,6 +41,9 @@ export const F_SHARP_MAJOR_KEY: Key = {
             chords: [
                 { name: 'B', quality: 'major', voicings: generateVoicings('B', 'major', 'F#') },
                 { name: 'Bmaj7', quality: 'maj7', voicings: generateVoicings('B', 'maj7', 'F#') },
+                { name: 'B6', quality: '6', voicings: generateVoicings('B', '6', 'F#') },
+                { name: 'Badd9', quality: 'add9', voicings: generateVoicings('B', 'add9', 'F#') },
+                { name: 'Bmaj9', quality: 'maj9', voicings: generateVoicings('B', 'maj9', 'F#') },
                 { name: 'Bsus2', quality: 'sus2', voicings: generateVoicings('B', 'sus2', 'F#') },
                 { name: 'Bsus4', quality: 'sus4', voicings: generateVoicings('B', 'sus4', 'F#') },
             ]
@@ -42,6 +53,9 @@ export const F_SHARP_MAJOR_KEY: Key = {
             chords: [
                 { name: 'C#', quality: 'major', voicings: generateVoicings('C#', 'major', 'F#') },
                 { name: 'C#7', quality: 'dominant', voicings: generateVoicings('C#', 'dominant', 'F#') },
+                { name: 'C#9', quality: '9', voicings: generateVoicings('C#', '9', 'F#') },
+                { name: 'C#11', quality: '11', voicings: generateVoicings('C#', '11', 'F#') },
+                { name: 'C#13', quality: '13', voicings: generateVoicings('C#', '13', 'F#') },
                 { name: 'C#sus2', quality: 'sus2', voicings: generateVoicings('C#', 'sus2', 'F#') },
                 { name: 'C#sus4', quality: 'sus4', voicings: generateVoicings('C#', 'sus4', 'F#') },
             ]
@@ -51,6 +65,8 @@ export const F_SHARP_MAJOR_KEY: Key = {
             chords: [
                 { name: 'D#m', quality: 'minor', voicings: generateVoicings('D#', 'minor', 'F#') },
                 { name: 'D#m7', quality: 'm7', voicings: generateVoicings('D#', 'm7', 'F#') },
+                { name: 'D#m9', quality: 'm9', voicings: generateVoicings('D#', 'm9', 'F#') },
+                { name: 'D#m11', quality: 'm11', voicings: generateVoicings('D#', 'm11', 'F#') },
             ]
         },
         {
