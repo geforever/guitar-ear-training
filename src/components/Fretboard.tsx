@@ -24,7 +24,13 @@ const Fretboard: React.FC<FretboardProps> = ({ voicing, name, width = 200, heigh
     return (
         <div className="flex flex-col items-center">
             <h3 className="text-xl font-bold mb-2">{name}</h3>
-            <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+            <svg
+                width={width}
+                height={height}
+                viewBox={`0 0 ${width} ${height}`}
+                role="img"
+                aria-label={`Guitar chord diagram for ${name} at fret ${startFret}`}
+            >
                 {/* Fretboard Background */}
                 <rect x={padding} y={padding} width={boardWidth} height={boardHeight} fill="#f5f5f5" stroke="none" />
 

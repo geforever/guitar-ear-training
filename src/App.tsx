@@ -6,6 +6,7 @@ import QuizArea from './components/QuizArea';
 import Layout from './components/Layout';
 import { Guitar, Globe } from 'lucide-react';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 function AppContent() {
   // State
@@ -174,66 +175,76 @@ function AppContent() {
 
 
   return (
-    <Layout
-      isDrawerOpen={isDrawerOpen}
-      onDrawerToggle={() => setIsDrawerOpen(!isDrawerOpen)}
-      drawerContent={
-        <GameControls
-          keys={Object.keys(CHORD_LIBRARY)}
-          selectedKey={selectedKey}
-          onKeyChange={setSelectedKey}
-          onStart={handleStart}
-          isPlaying={isPlaying}
-          rootGroups={currentKeyData.roots}
-          selectedVoicingIds={selectedVoicingIds}
-          onToggleVoicing={handleToggleVoicing}
-          onToggleChordAll={handleToggleChordAll}
-          onClearAll={handleClearAllGlobal}
-        />
-      }
-    >
-      <div className="flex flex-col items-center justify-center h-full w-full bg-gray-50 relative text-gray-900">
-        {/* Language Toggle */}
-        <button
-          onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
-          className="absolute top-6 left-6 p-3 bg-white hover:bg-gray-100 border border-gray-200 shadow-sm rounded-full text-gray-700 transition-all z-10 flex items-center gap-2"
-        >
-          <Globe size={20} />
-          <span className="text-sm font-bold">{language === 'en' ? 'EN' : '中'}</span>
-        </button>
-
-        {!isPlaying ? (
-          <div className="text-center p-10">
-            <Guitar size={80} className="text-blue-600 mx-auto mb-6" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-              {t.title}
-            </h1>
-            <p className="text-xl text-gray-500">
-              {t.subtitle}
-            </p>
-          </div>
-        ) : (
-          <QuizArea
-            currentVoicing={currentVoicing}
-            options={gameOptions}
-            onGuess={handleGuess}
-            feedback={feedback}
-            onReplay={handleReplay}
-            onNext={nextRound}
-            lastGuessedName={lastGuessedName}
-            isAudioPlaying={isAudioPlaying}
+    <>
+      <Helmet>
+        <title>{t.title}</title>
+        <meta name="description" content={t.metaDescription} />
+        <meta name="keywords" content={t.metaKeywords} />
+        <html lang={language === 'zh' ? 'zh-CN' : 'en'} />
+      </Helmet>
+      <Layout
+        isDrawerOpen={isDrawerOpen}
+        onDrawerToggle={() => setIsDrawerOpen(!isDrawerOpen)}
+        drawerContent={
+          <GameControls
+            keys={Object.keys(CHORD_LIBRARY)}
+            selectedKey={selectedKey}
+            onKeyChange={setSelectedKey}
+            onStart={handleStart}
+            isPlaying={isPlaying}
+            rootGroups={currentKeyData.roots}
+            selectedVoicingIds={selectedVoicingIds}
+            onToggleVoicing={handleToggleVoicing}
+            onToggleChordAll={handleToggleChordAll}
+            onClearAll={handleClearAllGlobal}
           />
-        )}
-      </div>
-    </Layout>
+        }
+      >
+        <div className="flex flex-col items-center justify-center h-full w-full bg-gray-50 relative text-gray-900">
+          {/* Language Toggle */}
+          <button
+            onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
+            className="absolute top-6 left-6 p-3 bg-white hover:bg-gray-100 border border-gray-200 shadow-sm rounded-full text-gray-700 transition-all z-10 flex items-center gap-2"
+          >
+            <Globe size={20} />
+            <span className="text-sm font-bold">{language === 'en' ? 'EN' : '中'}</span>
+          </button>
+
+          {!isPlaying ? (
+            <div className="text-center p-10">
+              <Guitar size={80} className="text-blue-600 mx-auto mb-6" />
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+                {t.title}
+              </h1>
+              <p className="text-xl text-gray-500">
+                {t.subtitle}
+              </p>
+            </div>
+          ) : (
+            <QuizArea
+              currentVoicing={currentVoicing}
+              options={gameOptions}
+              onGuess={handleGuess}
+              feedback={feedback}
+              onReplay={handleReplay}
+              onNext={nextRound}
+              lastGuessedName={lastGuessedName}
+              isAudioPlaying={isAudioPlaying}
+            />
+          )}
+        </div>
+      </Layout>
+    </>
   );
 }
 
 function App() {
   return (
-    <LanguageProvider>
-      <AppContent />
-    </LanguageProvider>
+    <HelmetProvider>
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
+    </HelmetProvider>
   );
 }
 

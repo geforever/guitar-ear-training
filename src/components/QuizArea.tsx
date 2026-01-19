@@ -32,6 +32,7 @@ const QuizArea: React.FC<QuizAreaProps> = ({
 
     return (
         <div className="flex flex-col items-center w-full h-full max-h-screen pt-4">
+            <h1 className="sr-only">{t.title}</h1>
             {/* Controls: Replay & Next */}
             <div className="mb-6 flex-shrink-0 flex gap-4">
                 <button

@@ -25,6 +25,8 @@ interface Translations {
     selectNone: string;
     minSelection: string;
     chordLibrary: string;
+    metaDescription: string;
+    metaKeywords: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -51,6 +53,8 @@ const translations: Record<Language, Translations> = {
         selectNone: 'Clear',
         minSelection: 'Select at least 2 voicings.',
         chordLibrary: 'Chord Library',
+        metaDescription: 'Master your guitar ear training with our interactive tool. Practice identifying chords and voicings in any key.',
+        metaKeywords: 'guitar, ear training, chords, voicings, music education, guitar practice',
     },
     zh: {
         settings: '设置',
@@ -75,6 +79,8 @@ const translations: Record<Language, Translations> = {
         selectNone: '清空',
         minSelection: '请至少选择 2 个指法。',
         chordLibrary: '和弦库',
+        metaDescription: '通过我们的交互式工具提升您的吉他听音能力。练习识别任何调号中的和弦及其指法。',
+        metaKeywords: '吉他, 听音训练, 和弦, 指法, 音乐教育, 吉他练习',
     }
 };
 
